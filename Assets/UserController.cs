@@ -51,6 +51,10 @@ public class UserController : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 placingPartGhost.GetComponent<PartController>().SetGhost(false);
+                // TODO add hinge
+                placingPart = false;
+                placingPartGhost = null;
+                partBeingPlaced = new PlaceablePart();
             }
         }
 

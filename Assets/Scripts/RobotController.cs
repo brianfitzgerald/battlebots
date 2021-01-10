@@ -66,7 +66,7 @@ public class RobotController : MonoBehaviour
             var partController = child.gameObject.GetComponent<PartController>();
             if (partController != null)
             {
-                Debug.Log(partController.gameObject.name);
+                // Debug.Log(partController.gameObject.name);
                 if (partController.partType == PartType.COSMETIC)
                 {
                     continue;

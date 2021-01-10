@@ -18,12 +18,21 @@ public class PartController : MonoBehaviour
     private Material partMaterial;
     public void Start()
     {
-        ghostMaterial = Resources.Load("Material/Ghost.mat", typeof(Material)) as Material;
-        partMaterial = Resources.Load("Material/Part.mat", typeof(Material)) as Material;
+        ghostMaterial = Resources.Load<Material>("Ghost");
+        partMaterial = Resources.Load<Material>("Part");
     }
     public void SetGhost(bool isGhost)
     {
         this.isGhost = isGhost;
-        GetComponent<MeshRenderer>().material = isGhost ? ghostMaterial : partMaterial;
+        var renderers = GetComponentsInChildren<MeshRenderer>();
+        foreach (var renderer in renderers)
+        {
+            renderer.sharedMaterials[0] = isGhost ? ghostMaterial : partMaterial;
+        }
+        var colliders = GetComponentsInChildren<Collider>();
+        foreach (var collider in colliders)
+        {
+            collider.enabled = !isGhost;
+        }
     }
 }
