@@ -5,7 +5,7 @@ using UnityEngine;
 public class RobotController : MonoBehaviour
 {
     public List<Rigidbody> wheels;
-    public List<PartController> hammers;
+    public List<HingeJoint> hammerHinges;
     public float maxMotorTorque;
     public float maxSteeringAngle;
 
@@ -38,7 +38,7 @@ public class RobotController : MonoBehaviour
         {
             var wheel = wheels[i];
             var force = i % 2 == 0 ? motor - steering : motor + steering;
-            Debug.Log($"{force} {steering} {motor}");
+            // Debug.Log($"{force} {steering} {motor}");
             wheels[i].AddForce(wheel.transform.forward * force, ForceMode.Acceleration);
             Debug.DrawRay(wheel.transform.position, wheel.transform.forward * force, Color.green, Time.fixedDeltaTime * 2);
             // ApplyLocalPositionToVisuals(collider);
@@ -52,45 +52,84 @@ public class RobotController : MonoBehaviour
     // For now, we just add a hinge to every piece.
     public GameObject body;
 
-    public Vector2 springSpringDamper;
+    public Vector2 partSpringDamper;
+    public Vector2 wheelSpringDamper;
     void Start()
     {
-        foreach (var child in transform.GetComponentsInChildren<Rigidbody>())
+        foreach (Transform child in transform)
         {
             // if (child.gameObject.GetComponent<WheelCollider>())
             // {
             //     continue;
             // }
             // ignore cosmetic parts
-            var partController = child.GetComponent<PartController>();
+            var partController = child.gameObject.GetComponent<PartController>();
             if (partController != null)
             {
+                Debug.Log(partController.gameObject.name);
                 if (partController.partType == PartType.COSMETIC)
                 {
                     continue;
                 }
-                if (partController.partType == PartType.HAMMER)
-                {
-                    hammers.Add(partController);
-                }
             }
             if (child.name == "Body")
             {
-                Debug.Log("Found Body");
+                // Debug.Log("Found Body");
                 continue;
+            }
+            if (child.GetComponent<Rigidbody>() == null)
+            {
+                return;
             }
             var hinge = body.AddComponent<HingeJoint>();
             hinge.useSpring = true;
             var spring = new JointSpring();
-            spring.spring = springSpringDamper.x;
-            spring.damper = springSpringDamper.y;
+            if (partController != null && partController.partType == PartType.WHEEL)
+            {
+                spring.spring = wheelSpringDamper.x;
+                spring.damper = wheelSpringDamper.y;
+            }
+            else
+            {
+                spring.spring = partSpringDamper.x;
+                spring.damper = partSpringDamper.y;
+            }
             hinge.spring = spring;
-            hinge.connectedBody = child;
+            if (partController != null && partController.partType == PartType.HAMMER)
+            {
+                hinge.anchor = partController.anchor.transform.localPosition;
+                hinge.axis = new Vector3(0, 0, 1);
+                hammerHinges.Add(hinge);
+            }
+            hinge.connectedBody = child.GetComponent<Rigidbody>();
         }
     }
 
+
+    public bool bonking;
+    public float bonkTime;
+
+    public void Bonk()
+    {
+        bonking = !bonking;
+        var spring = new JointSpring();
+        spring.targetPosition = bonking ? 30 : 0;
+        spring.spring = partSpringDamper.x;
+        spring.damper = partSpringDamper.y;
+        foreach (var hammer in hammerHinges)
+        {
+            hammer.spring = spring;
+        }
+    }
     void Update()
     {
-
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            Bonk();
+        }
+        if (Input.GetKeyUp(KeyCode.B))
+        {
+            Bonk();
+        }
     }
 }

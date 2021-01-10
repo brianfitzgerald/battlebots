@@ -10,6 +10,6 @@ public enum PartType
 }
 public class PartController : MonoBehaviour
 {
-
+    public Transform anchor;
     public PartType partType;
 }
