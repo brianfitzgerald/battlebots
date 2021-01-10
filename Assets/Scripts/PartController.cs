@@ -5,7 +5,8 @@ using UnityEngine;
 public enum PartType
 {
     COSMETIC,
-    HAMMER
+    HAMMER,
+    WHEEL
 }
 public class PartController : MonoBehaviour
 {

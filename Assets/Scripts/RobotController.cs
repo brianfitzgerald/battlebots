@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class RobotController : MonoBehaviour
 {
-    public List<WheelCollider> wheelColliders;
+    public List<Rigidbody> wheels;
     public List<PartController> hammers;
     public float maxMotorTorque;
     public float maxSteeringAngle;
@@ -33,11 +33,15 @@ public class RobotController : MonoBehaviour
         float motor = maxMotorTorque * Input.GetAxis("Vertical");
         float steering = maxSteeringAngle * Input.GetAxis("Horizontal");
 
-        foreach (WheelCollider collider in wheelColliders)
+        // front left, front right, back left, back right
+        for (var i = 0; i < wheels.Count; i++)
         {
-            collider.steerAngle = steering;
-            collider.motorTorque = motor;
-            ApplyLocalPositionToVisuals(collider);
+            var wheel = wheels[i];
+            var force = i % 2 == 0 ? motor - steering : motor + steering;
+            Debug.Log($"{force} {steering} {motor}");
+            wheels[i].AddForce(wheel.transform.forward * force, ForceMode.Acceleration);
+            Debug.DrawRay(wheel.transform.position, wheel.transform.forward * force, Color.green, Time.fixedDeltaTime * 2);
+            // ApplyLocalPositionToVisuals(collider);
         }
     }
 
